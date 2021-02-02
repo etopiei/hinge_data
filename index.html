@@ -1,0 +1,87 @@
+<html>
+	<input type="file" onchange="processMatches(this)">
+	<div id="results"></div>
+</html>
+
+<script>
+function processMatches(input) {
+	const file = input.files[0];
+
+	const reader = new FileReader();
+	reader.onload = function() {
+		const textContent = reader.result;
+		const matchData = JSON.parse(textContent);
+		makeStats(matchData);
+	};
+
+	reader.readAsText(file);
+}
+
+function makeStats(matchData) {
+	const likes_sent = matchData.filter(m => m.like).length;
+	const likes_received = matchData.length - likes_sent;
+	const total_likes = likes_sent + likes_received;
+
+	const matches_from_likes_sent = matchData.filter(m => m.like && m.match).length;
+	const matches_from_likes_received = matchData.filter(m => !m.like && m.match).length;
+	const total_matches = matches_from_likes_received + matches_from_likes_sent;
+
+	const reject_from_like_sent = likes_sent - matches_from_likes_sent;
+	const reject_from_like_received = likes_received - matches_from_likes_received;
+
+	const meetups = matchData.filter(m => m["we_met"]).length;
+	const match_no_meet = matches_from_likes_sent + matches_from_likes_received - meetups;
+
+	const matched_objects = matchData.filter(m => m.match);
+	const count_messages = (match) => {
+		if (match.chats) {
+			return match.chats.length;
+		}
+		return 0;
+	};
+	const average_message_number_for_match = matched_objects.reduce((acc, current) => { return acc + count_messages(current) }, 0) / matched_objects.length;
+
+	const stats = {
+		likes_sent,
+		likes_received,
+		total_likes,
+		matches_from_likes_sent,
+		matches_from_likes_received,
+		total_matches,
+		reject_from_like_sent,
+		reject_from_like_received,
+		meetups,
+		match_no_meet,
+		average_message_number_for_match
+	}
+
+	printData(stats);
+	makeGraphs(stats);
+}
+
+function formatNumber(n) {
+	// Hacky way to round to two decimal places.
+	return Math.round(n * 100) / 100;
+}
+
+function printData(stats) {
+	const resultElement = document.getElementById("results");
+	resultElement.innerText = `
+	Total Likes: ${stats.total_likes}
+	Likes Sent: ${stats.likes_sent} (${formatNumber(stats.likes_sent / stats.total_likes * 100)}% of Total Likes)
+	Likes Received: ${stats.likes_received} (${formatNumber(stats.likes_received / stats.total_likes * 100)}% of Total Likes)
+
+	Total Matches: ${stats.total_matches}
+	Matches from Likes Sent: ${stats.matches_from_likes_sent} (${formatNumber(stats.matches_from_likes_sent / stats.likes_sent * 100)}% of Likes Sent => Matches)
+	Matches from Likes Received: ${stats.matches_from_likes_received} (${formatNumber(stats.matches_from_likes_received / stats.likes_received * 100)}% of Likes Received => Matches)
+
+	Meetups: ${stats.meetups}	(${formatNumber(stats.meetups / stats.total_matches * 100)}% of Matches Met)
+
+	Average Number of Chat Messages: ${formatNumber(stats.average_message_number_for_match)}
+	`;
+}
+
+function makeGraphs(stats) {
+	console.log("Graphs coming soon!");
+}
+</script>
