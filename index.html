@@ -1,6 +1,24 @@
-<html>
-	<input type="file" onchange="processMatches(this)">
-	<div id="results"></div>
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link rel="stylesheet" href="simple.min.css">
+		<title>Hinge Data Explorer</title>
+	</head>
+	<body>
+		<header>
+			<h2>Hinge Data Explorer</h2>
+		</header>
+		<main>
+			<p id="help-text">Select your 'matches.json' file from the hinge data export:</p>
+			<input id="file-select" type="file" onchange="processMatches(this)">
+			<div id="results"></div>
+		</main>
+		<footer>
+			Made by <a href="https://github.com/etopiei">@etopiei</a>
+		</footer>
+	</body>
 </html>
 
 <script>
@@ -62,6 +80,17 @@ function makeStats(matchData) {
 
 	printData(stats);
 	makeGraphs(stats);
+	hideInput();
+}
+
+function removeElements(elements) {
+	elements.forEach(el => el.parentElement.removeChild(el));
+}
+
+function hideInput() {
+	const fileSelect = document.getElementById("file-select");
+	const helpText = document.getElementById("help-text");
+	removeElements([fileSelect, helpText]);
 }
 
 function formatNumber(n) {
