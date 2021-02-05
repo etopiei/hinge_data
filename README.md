@@ -1,4 +1,4 @@
-# Hinge Date Explorer
+# Hinge Data Explorer
 
 [Check out the site here](https://hinge.etopiei.com)
 
