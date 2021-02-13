@@ -16,6 +16,7 @@
 			<p id="help-text">Select your 'matches.json' file from the hinge data export:</p>
 			<input id="file-select" type="file" onchange="processMatches(this)">
 			<div class="graph-container" id="likes-graph"></div>
+			<div class="graph-container" id="time-of-day"></div>
 			<div class="graph-container" id="sankey"></div>
 			<div id="results"></div>
 		</main>
@@ -165,6 +166,38 @@ function makeGraphs(stats, matchData) {
 		}
 	};
 	Plotly.newPlot(document.getElementById("sankey"), [sankeyData], sankeyLayout);
+
+	const arrayOfPercentagesFromValues = (arr) => {
+		const total = arr.reduce((acc, current) => acc + current, 0);
+		return arr.map(v => v / total * 100);
+	};
+
+	const getHourFactoringTZ = (hour) => {
+		let adjustedHour = hour - (new Date().getTimezoneOffset() / 60);
+		return adjustedHour % 24; // So we don't over or underflow into a different day and miss the index.
+	};
+
+	const timeSortedMatchesFromLikesSent = new Array(24).fill(0);
+	matchData.filter(m => m.match && m.like).forEach(m => {
+		timeSortedMatchesFromLikesSent[getHourFactoringTZ(new Date(m.like[0].timestamp).getHours())] += 1;
+	});
+
+	const timeData = {
+		x: ["12am", "1am", "2am", "3am", "4am", "5am", "6am", "7am", "8am", "9am", "10am", "11am", "12pm", "1pm", "2pm", "3pm", "4pm", "5pm", "6pm", "7pm", "8pm", "9pm", "10pm", "11pm"],
+		y: arrayOfPercentagesFromValues(timeSortedMatchesFromLikesSent),
+		type: 'bar'
+	};
+
+	const timeLayout = {
+		title: "% of Matches from Likes Sent At Time",
+		paper_bgcolor: "rgb(22, 22, 22)",
+		plot_bgcolor: "rgb(22, 22, 22)",
+		font: {
+			color: "white"
+		}
+	};
+
+	Plotly.newPlot(document.getElementById("time-of-day"), [timeData], timeLayout);
 }
 </script>
 <style>
