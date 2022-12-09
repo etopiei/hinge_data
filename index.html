@@ -46,7 +46,9 @@ function makeStats(matchData) {
 	window.matchData = matchData;
 
 	const likes_sent = matchData.filter(m => m.like).length;
-	const likes_received = matchData.length - likes_sent;
+	const blocks = matchData.filter(m => !m.like && m.block && !m.match).length
+	//blocks and likes sent must be subtracted from matchdata.length to get accurate likes received data.
+	const likes_received = matchData.length - blocks - likes_sent;
 	const total_likes = likes_sent + likes_received;
 
 	const matches_from_likes_sent = matchData.filter(m => m.like && m.match).length;
